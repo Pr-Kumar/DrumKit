@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Filter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -48,6 +49,12 @@ public class Accelerometer
     private float currentFilter;
     private Timer samplingTimer;
 
+    static final float NS2S = 1.0f / 1000000000.0f;
+    float[] last_values = null;
+    float[] velocity = null;
+    float[] position = null;
+    long last_timestamp = 0;
+
     private float x, y, z;
 
     private long lastUpdate = -1;
@@ -67,7 +74,7 @@ public class Accelerometer
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         // Get an instance of the SensorManager
         sensorManager2 = (SensorManager) getSystemService(SENSOR_SERVICE);
         accel = sensorManager2.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -78,24 +85,17 @@ public class Accelerometer
         //filterBar1.setVisibility(View.INVISIBLE);
 
         BtnStart.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View arg0) {
-
                 numSteps = 0;
                 sensorManager2.registerListener(Accelerometer.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
-
             }
         });
 
-
         BtnStop.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View arg0) {
-
                 sensorManager2.unregisterListener(Accelerometer.this);
-
             }
         });
     }
@@ -142,7 +142,7 @@ public class Accelerometer
 
     @Override // SensorEventListener
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        if (sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        if (sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
             switch (accuracy) {
                 case SENSOR_STATUS_UNRELIABLE:
                     accuracyLabel.setText(R.string.accuracy_unreliable);
@@ -163,17 +163,17 @@ public class Accelerometer
     @Override // SensorEventListener
     //public void onSensorChanged(SensorEvent sensorEvent, float[] values) {
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
             long curTime = System.currentTimeMillis();
             // only allow one update every 100ms, otherwise updates
             // come way too fast and the phone gets bogged down
             // with garbage collection
-            //if (lastUpdate == -1 || (curTime - lastUpdate) > 100) {
+            if (lastUpdate == -1 || (curTime - lastUpdate) > 100) {
             lastUpdate = curTime;
 
-            x = sensorEvent.values[DATA_X];
-            y = sensorEvent.values[DATA_Y];
-            z = sensorEvent.values[DATA_Z];
+            x = sensorEvent.values[0];
+            y = sensorEvent.values[1];
+            z = sensorEvent.values[2];
             float abs = new Float(Math.sqrt(x*x + y*y + z*z));
             currentSample = x;
 
@@ -183,7 +183,7 @@ public class Accelerometer
             absLabel.setText(String.format("ABS: %+2.5f ", abs));
             int progress = 100 * (int) (Math.sqrt(currentFilter * currentFilter));
             filter.setProgress(progress);
-            //}
+            }
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
