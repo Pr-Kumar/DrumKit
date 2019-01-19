@@ -55,7 +55,7 @@ public class Accelerometer
         super.onCreate(savedInstanceState);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
         findViews();
         filterBar1.setVisibility(View.INVISIBLE);
     }
