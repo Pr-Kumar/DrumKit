@@ -1,0 +1,10 @@
+<resources>
+    <string name="name">DrumKit</string>
+    <string name="hello">Hello World, Accelerometer!</string>
+    <string name="app_name">Accelerometer</string>
+    <string name="no_accelerometer">No accelerometer</string>
+    <string name="accuracy_unreliable">Unreliable accuracy</string>
+    <string name="accuracy_low">Low accuracy</string>
+    <string name="accuracy_medium">Medium accuracy</string>
+    <string name="accuracy_high">High accuracy</string>
+</resources>
