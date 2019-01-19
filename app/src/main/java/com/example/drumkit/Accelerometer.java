@@ -20,6 +20,7 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -61,7 +62,8 @@ public class Accelerometer
     private int numSteps;TextView TvSteps;
     TextView BtnStart;
     TextView BtnStop;
-    MediaPlayer mp;
+    MediaPlayer mpsnare;
+    MediaPlayer mpcrash;
 
 
     @Override
@@ -111,8 +113,14 @@ public class Accelerometer
 
     @Override
     public void step(long timeNs) {
-        mp = MediaPlayer.create(this, R.raw.snare);
-        mp.start();
+        mpsnare = MediaPlayer.create(this, R.raw.snare);
+        mpcrash = MediaPlayer.create(this, R.raw.crash);
+        if(x>0 && z > 0) {mpsnare.start();}
+        if(x <0 && z< 0) {mpcrash.start();}
+        Log.d("values","\n-------\n");
+        Log.d("Xvalue", Float.toString(x));
+        Log.d("Yvalue", Float.toString(y));
+        Log.d("Zvalue", Float.toString(z));
         numSteps++;
         TvSteps.setText(TEXT_NUM_STEPS + numSteps);
     }
