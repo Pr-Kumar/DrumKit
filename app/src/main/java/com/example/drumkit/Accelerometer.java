@@ -18,10 +18,12 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -31,7 +33,7 @@ import android.widget.TextView;
  */
 public class Accelerometer
         extends Activity
-        implements SensorEventListener {
+        implements SensorEventListener, StepListener {
     private SensorManager sensorManager;
     private Sensor accelerometer;
 
@@ -50,15 +52,68 @@ public class Accelerometer
 
     private long lastUpdate = -1;
 
+    private TextView textView;
+    private StepDetector simpleStepDetector;
+    private SensorManager sensorManager2;
+    private Sensor accel;
+    private static final String TEXT_NUM_STEPS = "Number of Steps: ";
+    private int numSteps;TextView TvSteps;
+    TextView BtnStart;
+    TextView BtnStop;
+
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        // Get an instance of the SensorManager
+        sensorManager2 = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accel = sensorManager2.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        simpleStepDetector = new StepDetector();
+        simpleStepDetector.registerListener(this);
         setContentView(R.layout.activity_main);
         findViews();
-        filterBar1.setVisibility(View.INVISIBLE);
+        //filterBar1.setVisibility(View.INVISIBLE);
+
+        BtnStart.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+
+                numSteps = 0;
+                sensorManager2.registerListener(Accelerometer.this, accel, SensorManager.SENSOR_DELAY_FASTEST);
+
+            }
+        });
+
+
+        BtnStop.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+
+                sensorManager2.unregisterListener(Accelerometer.this);
+
+            }
+        });
     }
+
+//    @Override
+//    public void onSensorChanged(SensorEvent event) {
+//        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+//            simpleStepDetector.updateAccel(
+//                    event.timestamp, event.values[0], event.values[1], event.values[2]);
+//        }
+//    }
+
+    @Override
+    public void step(long timeNs) {
+        numSteps++;
+        TvSteps.setText(TEXT_NUM_STEPS + numSteps);
+    }
+
 
     @Override
     protected void onResume() {
@@ -130,6 +185,11 @@ public class Accelerometer
             filter.setProgress(progress);
             //}
         }
+
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            simpleStepDetector.updateAccel(
+                    sensorEvent.timestamp, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+        }
     }
 
     @Override
@@ -155,7 +215,12 @@ public class Accelerometer
         absLabel = (TextView) findViewById(R.id.abs_label);
         sample = (TextView) findViewById(R.id.sample_label);
         filter = (ProgressBar) findViewById(R.id.filter_label);
-        filterBar1 = (ProgressBar) findViewById(R.id.filter_bar_1);
+        //filterBar1 = (ProgressBar) findViewById(R.id.filter_bar_1);
+
+        TvSteps = (TextView) findViewById(R.id.tv_steps);
+        BtnStart = (Button) findViewById(R.id.btn_start);
+        BtnStop = (Button) findViewById(R.id.btn_stop);
+
     }
 
     protected void displayRawData(float[] values) {
