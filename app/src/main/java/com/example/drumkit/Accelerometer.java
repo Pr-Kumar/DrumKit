@@ -61,7 +61,8 @@ public class Accelerometer
     private int numSteps;TextView TvSteps;
     TextView BtnStart;
     TextView BtnStop;
-    MediaPlayer mp;
+    MediaPlayer mphihat;
+    MediaPlayer mptom;
 
 
     @Override
@@ -111,8 +112,10 @@ public class Accelerometer
 
     @Override
     public void step(long timeNs) {
-        mp = MediaPlayer.create(this, R.raw.snare);
-        mp.start();
+        mphihat = MediaPlayer.create(this, R.raw.hihat);
+        mptom = MediaPlayer.create(this, R.raw.tom);
+        if (x>0 & z>0) { mphihat.start(); }
+        if (x<0 & z<0) { mptom.start(); }
         numSteps++;
         TvSteps.setText(TEXT_NUM_STEPS + numSteps);
     }
